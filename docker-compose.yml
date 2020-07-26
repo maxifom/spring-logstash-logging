@@ -1,0 +1,32 @@
+version: "3"
+
+networks:
+  backend:
+    driver: bridge
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    ports:
+      - 9200:9200
+      - 9300:9300
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+    networks:
+      - backend
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.8.0
+    ports:
+      - 5009:5009
+    networks:
+      - backend
+    volumes:
+      - ./pipeline:/usr/share/logstash/pipeline
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.0
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+      - backend
+    ports:
+      - 5601:5601
